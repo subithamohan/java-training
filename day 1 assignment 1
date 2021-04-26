@@ -1,0 +1,26 @@
+create table sales
+(
+sales_id int,
+sales_product varchar(20),
+sales_date date,
+sales_revenue int,
+sales_qty int);
+
+create table stock
+(
+s_id int,
+s_product varchar(20),
+s_date date,
+s_warehouse varchar(20),
+s_qty int);
+
+ select systimestamp from dual;
+
+select sysdate from dual;
+
+select to_char(sysdate , 'dd/mm/yyyy' ) from dual;
+
+select sysdate , sysdate+10 add_10_days from dual;
+
+
+select to_char(date '2021-04-26' , 'day') day from dual;
