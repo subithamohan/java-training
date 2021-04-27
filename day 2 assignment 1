@@ -1,0 +1,49 @@
+craete:
+
+create table employee
+(
+empfname varchar(20),
+empmname varchar(20),
+emplname varchar(20),
+empage int check (empage between 0 and 50),
+empcity  varchar(20) check (empcity like 'b%'),
+empdesignation varchar(30) check (empdesignation like '%manager'),
+empid int primary key check (length(empid) = 5),
+empdob date 
+);
+
+insert:
+
+insert into employee values ('ram' , 'gopal' , 'chari' ,20,'bihar','sales manager',11000,'20-oct-2000');
+
+insert into employee values ('rana' , 'bahat' , 'abu' ,25,'bangalore','dept manager',11001,'10-jan-1995');
+
+
+insert into employee values ('mano' , 'kumar' , 'don' ,35,'bijapur','dept manager',11002,'05-may-1989');
+
+
+insert into employee values ('ram' , 'inba' , 'raj' ,20,'bihar','sales manager',11003,'20-apr-2002');
+
+
+insert into employee values ('janu' , 'gopal' , 'reddy' ,20,'bangalore','sales manager',11004,'30-oct-1990');
+
+update:
+
+ update employee set empcity='bihar' where empid=11004;
+ 
+ delete a record:
+
+delete from employee where empid=11000;
+
+commit;
+
+delete from employee;
+
+rollback;
+
+select empfname,to_char(empdob,'dd-mm-yyyy') as dob from employee;
+
+select substr(empfname,1,1)||'.'||substr(empmname,1,1)||'.'||emplname as empname from Employee;
+
+
+
