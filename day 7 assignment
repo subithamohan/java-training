@@ -1,0 +1,192 @@
+Number.java
+package number.demo.pack;
+
+public interface Number {
+	boolean PhoneNumFormat(String Number);
+
+}
+
+
+Country.java
+package number.demo.pack;
+
+abstract class Country implements Number {
+	public static void main(String[] args) {
+		String IndNumber="+91-9856856989";
+		String QatNumber="+974 3362-2548";
+		String BrazNumber="+55 15 95428-3695";
+		String NorwNumber="+47-49-25-48-36";
+		String TurNumber="+90 205-658962";
+		India india=new India();
+		Norway norway=new Norway();
+		Qatar qatar=new Qatar();
+		Turkey turkey=new Turkey();
+		Brazil brazil=new Brazil();
+		 System.out.println("India:"+india.PhoneNumFormat(IndNumber));
+		 System.out.println("Norway:"+norway.PhoneNumFormat(QatNumber));
+			System.out.println("Qatar:"+qatar.PhoneNumFormat(BrazNumber));
+			System.out.println("Turkey:"+turkey.PhoneNumFormat(NorwNumber));
+			System.out.println("Brazil:"+brazil.PhoneNumFormat(TurNumber));
+		}
+
+}
+
+
+
+Qatar.java
+package number.demo.pack;
+
+public class Qatar extends Country{
+	public boolean PhoneNumFormat(String PhnNumber)
+	{
+		char ar[]=PhnNumber.toCharArray();
+		int flag=0;
+		if(ar[0]=='+'&&ar[1]=='9'&&ar[2]=='7'&&ar[3]=='4'&&ar[4]==' '&&ar[5]=='3'&&ar[6]=='3')
+			for(int i=7;i<ar.length;i++)
+			{
+				if(i!=9)
+					if(ar[i]>='0'&&ar[i]<='9')
+							flag++;
+					else
+						return false;
+				else
+					if(ar[i]=='-')
+						flag++;
+			}
+		if(flag==7)
+			return true;
+		else 
+			return false;
+	}
+}
+
+
+Turkey.java
+package number.demo.pack;
+
+public class Turkey extends Country{
+	public boolean PhoneNumFormat(String PhnNumber)
+	{
+		char ar[]=PhnNumber.toCharArray();
+		int flag=0;
+		if(ar[0]=='+'&&ar[1]=='9'&&ar[2]=='0'&&ar[3]==' '&&ar[4]=='5'&&ar[5]=='0'&&ar[6]=='9'&&ar[7]=='-')
+		{
+			for(int i=8;i<ar.length;i++)
+			{
+				if(ar[i]>='0'&&ar[i]<='9')
+					flag++;
+				else
+					return false;
+			}
+			if(flag==6)
+				return true;
+			else 
+				return false;
+		}
+		else if(ar[0]=='0'&&ar[1]=='5'&&ar[2]=='0'&&ar[3]=='9'&&ar[4]=='-')
+		{
+			for(int i=5;i<ar.length;i++)
+			{
+				if(i!=8)
+					if(ar[i]>='0'&&ar[i]<='9')
+						flag++;
+					else
+						return false;
+				else
+					if(ar[i]=='-')
+						flag++;
+			}
+		if(flag==7)
+			return true;
+		else 
+			return false;
+		}
+		return false;
+	}
+
+}
+
+Brazil.java
+package number.demo.pack;
+
+public class Brazil extends Country{
+	public boolean PhoneNumFormat(String PhnNumber)
+	{
+		char ar[]=PhnNumber.toCharArray();
+		int flag=0;
+		if(ar[0]=='+'&&ar[1]=='5'&&ar[2]=='5'&&ar[3]==' '&&ar[4]=='1'&&ar[5]=='5'&&ar[6]==' ')
+			for(int i=7;i<ar.length;i++)
+			{
+				if(i!=12)
+					if(ar[i]>='0'&&ar[i]<='9')
+						flag++;
+					else
+						return false;
+				else
+					if(ar[i]=='-')
+					flag++;
+			}
+		if(flag==10)
+			return true;
+		else 
+			return false;
+	}
+
+}
+
+
+Norway.java
+package number.demo.pack;
+
+public class Norway extends Country{
+	public boolean PhoneNumFormat(String PhnNumber)
+	{
+		char ar[]=PhnNumber.toCharArray();
+		int flag=0;
+		if(ar[0]=='+'&&ar[1]=='4'&&ar[2]=='7'&&ar[3]=='-'&&ar[4]=='4')
+			for(int i=5;i<ar.length;i++)
+			{
+				if(i!=6&&i!=9&&i!=12)
+					if(ar[i]>='0'&&ar[i]<='9')
+						flag++;
+					else
+						return false;
+				else 
+					if(ar[i]=='-')
+						flag++;
+			}
+		if(flag==10)
+			return true;
+		else 
+			return false;
+	}
+
+
+}
+
+
+India.java
+package number.demo.pack;
+
+public class India extends Country{
+	public boolean PhoneNumFormat(String PhnNumber)
+	{
+		char ar[]=PhnNumber.toCharArray();
+		int flag=0;
+		if(ar[0]=='+'&&ar[1]=='9'&&ar[2]=='1'&&ar[3]=='-')
+			for(int i=4;i<ar.length;i++)
+			{
+				if(ar[i]>='0'&&ar[i]<='9')
+					flag++;
+				else
+					return false;
+			}
+		if(flag==10)
+			return true;
+		else 
+			return false;
+	}
+
+	
+}
+
