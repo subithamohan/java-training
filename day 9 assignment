@@ -1,0 +1,207 @@
+create a table Player
+-> Name
+-> role
+-> style
+-> team
+
+----->>
+ insert player recs into the table from a jdbc program ensure util, model ,dao and service are implemented in your code
+ 
+ -----------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+ PlayerDao.java
+package com.mydemo.dao;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import com.mydemo.model.Player;
+import com.mydemo.dbutil.DbConn;
+import com.mydemo.model.Player;
+
+//dml -> executeUpdate()
+//dql -> executeQuery()
+
+
+public class PlayerDao {
+
+
+public String savePlayer(Player player)
+{
+
+try {
+String sql="insert into player values(?,?,?,?)";
+
+Connection con= DbConn.dbConnect();
+PreparedStatement stat=con.prepareStatement(sql);
+
+stat.setString(1, player.getName());
+stat.setString(2, player.getRole());
+stat.setString(3, player.getStyle());
+stat.setString(4, player.getTeam());
+
+int res= stat.executeUpdate();
+
+if(res>0)
+return "recs inserted";
+
+}
+catch(Exception e)
+{
+
+e.printStackTrace();
+}
+
+
+return "cannot insert recs";
+}
+public Player getPlayerByName(String name)
+{
+
+try {
+
+Connection con= DbConn.dbConnect();
+
+String sql="select * from player where name=?";
+PreparedStatement stat=con.prepareStatement(sql);
+
+stat.setString(1, name);
+ResultSet rs= stat.executeQuery();
+
+rs.next();
+
+String role=rs.getString("role");
+String style= rs.getString("style");
+String team= rs.getString("team");
+
+Player player=new Player(name, role ,style, team);
+
+return player;
+
+}
+catch (Exception e) {
+
+e.printStackTrace();
+}
+return null;
+}
+
+
+
+
+}
+
+
+----------------------------------------------------------
+
+PlayerService.java
+
+package com.mydemo.service;
+
+import com.mydemo.dao.PlayerDao;
+import com.mydemo.model.Player;
+
+
+public class PlayerService {
+
+
+
+public static void main(String[] args) {
+
+
+Player player=new Player("mahi","batsman","right_hand_batsman","India");
+PlayerDao dao=new PlayerDao();
+Player play= dao.getPlayerByName("mahi");
+System.out.println(play);
+
+
+}
+
+
+}
+
+
+
+-----------------------------------------------------------------
+
+Player.java
+
+package com.mydemo.model;
+
+public class Player {
+
+	String Name;
+	String Role;
+	String Style;
+	String Team;
+	public String getName() {
+		return Name;
+	}
+	public void setName(String name) {
+		Name = name;
+	}
+	public String getRole() {
+		return Role;
+	}
+	public void setRole(String role) {
+		Role = role;
+	}
+	public String getStyle() {
+		return Style;
+	}
+	public void setStyle(String style) {
+		Style = style;
+	}
+	public String getTeam() {
+		return Team;
+	}
+	public void setTeam(String team) {
+		Team = team;
+	}
+	public Player(String name, String role, String style, String team) {
+		super();
+		Name = name;
+		Role = role;
+		Style = style;
+		Team = team;
+	}
+	public Player() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "Player [Name=" + Name + ", Role=" + Role + ", Style=" + Style + ", Team=" + Team + "]";
+	}
+	
+	
+	
+	
+}
+
+
+------------------------------------------------------------------------------------
+
+DbConn.java
+
+package com.mydemo.dbutil;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class DbConn {
+
+public static Connection dbConnect()
+{
+try{
+Class.forName("oracle.jdbc.OracleDriver");
+Connection con=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/xe","testdxc","pass");
+return con;
+}
+catch (Exception e) {
+e.printStackTrace();
+return null;
+}
+}
+}
