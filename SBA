@@ -1,0 +1,774 @@
+PlayerDao.java
+package com.mydemo.dao;
+import java.util.ArrayList;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import com.mydemo.model.Player;
+import com.mydemo.dbutil.DbConn;
+
+//dml -> executeUpdate()
+//dql -> executeQuery()
+
+
+public class PlayerDao {
+
+
+public String savePlayer(Player player)
+{
+
+try {
+String sql="insert into player values(?,?,?,?)";
+
+Connection con= DbConn.dbConnect();
+PreparedStatement stat=con.prepareStatement(sql);
+
+stat.setString(1, player.getName());
+stat.setString(2, player.getRole());
+stat.setString(3, player.getStyle());
+stat.setString(4, player.getTeam());
+
+int res= stat.executeUpdate();
+
+if(res>0)
+return "recs inserted";
+
+}
+catch(Exception e)
+{
+
+e.printStackTrace();
+}
+
+
+return "cannot insert recs";
+}
+
+public Player getPlayerByName(String name)
+{
+
+try {
+
+Connection con= DbConn.dbConnect();
+
+String sql="select * from player where name=?";
+PreparedStatement stat=con.prepareStatement(sql);
+
+stat.setString(1, name);
+ResultSet rs= stat.executeQuery();
+
+rs.next();
+
+String role=rs.getString("role");
+String style= rs.getString("style");
+String team= rs.getString("team");
+
+Player player=new Player(name, role ,style, team);
+
+return player;
+
+}
+catch (Exception e) {
+
+e.printStackTrace();
+}
+return null;
+}
+
+public ArrayList<Player> getPlayers()
+{
+
+try {
+
+Connection con= DbConn.dbConnect();
+
+String sql="select * from player";
+PreparedStatement stat=con.prepareStatement(sql);
+
+
+ResultSet rs= stat.executeQuery();
+
+ArrayList<Player> players=new ArrayList<>();
+
+while(rs.next())
+{
+
+
+String name=rs.getString("name");
+String role=rs.getString("role");
+String style= rs.getString("style");
+String team= rs.getString("team");
+
+
+Player player=new Player(name,role,style,team);
+
+players.add(player);
+}
+
+return players;
+
+}
+catch (Exception e) {
+
+e.printStackTrace();
+}
+return null;
+}
+
+public String deletePlayerByName(String name)
+{
+
+try {
+
+Connection con= DbConn.dbConnect();
+
+String sql="delete from player where name=?";
+PreparedStatement stat=con.prepareStatement(sql);
+
+stat.setString(1, name);
+int rs= stat.executeUpdate();
+
+if(rs>0)
+return "recs for name "+ name +" deleted";
+}
+catch (Exception e) {
+
+e.printStackTrace();
+}
+return null;
+}
+
+public String updatePlayer(Player player)
+{
+
+try {
+
+Player playOld=getPlayerByName(player.getName());
+
+System.out.println("old player "+playOld);
+
+Connection con= DbConn.dbConnect();
+
+String sql="update player set role=?,style=? ,team=?   where name=?";
+PreparedStatement stat=con.prepareStatement(sql);
+
+
+if(player.getRole()==null)
+player.setRole(playOld.getRole());
+
+if(player.getStyle()==null)
+player.setStyle(playOld.getStyle());
+
+if(player.getTeam()==null)
+player.setTeam(playOld.getTeam());
+
+
+
+
+
+stat.setString(1,player.getRole() );
+stat.setString(2, player.getStyle());
+stat.setString(3, player.getTeam());
+stat.setString(4, player.getName());
+
+
+int rs= stat.executeUpdate();
+
+
+
+if(rs>0) {
+
+System.out.println(playOld);
+
+System.out.println(player);
+
+return "recs updated for name "+player.getName();
+}
+}
+catch (Exception e) {
+
+e.printStackTrace();
+}
+return null;
+}
+
+
+
+
+
+
+}
+-------------------------------
+DbConn.java
+package com.mydemo.dbutil;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+
+public class DbConn {
+
+public static Connection dbConnect()
+{
+try{
+Class.forName("oracle.jdbc.OracleDriver");
+Connection con=DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521/xe","testdxc","pass");
+return con;
+}
+catch (Exception e) {
+e.printStackTrace();
+return null;
+}
+}
+}
+----------------------------------------------
+
+Player.java
+
+package com.mydemo.model;
+
+public class Player {
+
+	String Name;
+	String Role;
+	String Style;
+	String Team;
+	public String getName() {
+		return Name;
+	}
+	public void setName(String name) {
+		Name = name;
+	}
+	public String getRole() {
+		return Role;
+	}
+	public void setRole(String role) {
+		Role = role;
+	}
+	public String getStyle() {
+		return Style;
+	}
+	public void setStyle(String style) {
+		Style = style;
+	}
+	public String getTeam() {
+		return Team;
+	}
+	public void setTeam(String team) {
+		Team = team;
+	}
+	public Player(String name, String role, String style, String team) {
+		super();
+		Name = name;
+		Role = role;
+		Style = style;
+		Team = team;
+	}
+	public Player() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	@Override
+	public String toString() {
+		return "Player [Name=" + Name + ", Role=" + Role + ", Style=" + Style + ", Team=" + Team + "]";
+	}
+	
+	
+	
+	
+}
+
+--------------------------------------------------------
+
+PlayerServlet.java
+
+package com.mydemo.service;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.mydemo.dao.PlayerDao;
+import com.mydemo.model.Player;
+
+
+@WebServlet("/PlayerServlet")
+public class PlayerServlet extends HttpServlet {
+       
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+
+String name=request.getParameter("name");
+
+String role=request.getParameter("role");
+
+
+String style=request.getParameter("style");
+String team=request.getParameter("team");
+
+
+
+
+
+Player player=new Player(name,role,style,team);
+
+PlayerDao dao=new PlayerDao();
+
+
+PrintWriter out=response.getWriter();
+response.setContentType("text/html");
+out.print("<body bgcolor='grey'>");
+out.print(dao.savePlayer(player));
+
+
+}
+
+
+}
+
+-------------------------------------------
+
+PlayerSearchServlet.java
+
+package com.mydemo.service;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.mydemo.dao.PlayerDao;
+import com.mydemo.model.Player;
+
+
+@WebServlet("/PlayerSearchServlet")
+public class PlayerSearchServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+       
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+String name=request.getParameter("name");
+
+PlayerDao dao=new PlayerDao();
+Player player= dao.getPlayerByName(name);
+
+PrintWriter out =response.getWriter();
+response.setContentType("text/html");
+
+
+//redirect
+//session
+
+HttpSession session= request.getSession();
+session.setAttribute("player",player);
+
+RequestDispatcher rd= request.getRequestDispatcher("DisplayPlayer.jsp");
+rd.forward(request, response);
+
+}
+
+}
+
+---------------------------------------------------
+PlayerDeleteServlet.java
+
+package com.mydemo.service;
+
+
+
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.mydemo.dao.PlayerDao;
+
+
+@WebServlet("/PlayerDeleteServlet")
+public class PlayerDeleteServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+      public PlayerDeleteServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+String name=request.getParameter("name");
+
+
+PlayerDao dao=new PlayerDao();
+String msg= dao.deletePlayerByName(name);
+
+PrintWriter out=response.getWriter();
+response.setContentType("text/html");
+out.print(msg);
+
+}
+
+
+
+}
+
+---------------------------
+PlayerUpdateServlet.java
+
+package com.mydemo.service;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.mydemo.dao.PlayerDao;
+import com.mydemo.model.Player;
+
+/**
+ * Servlet implementation class updateServlet
+ */
+@WebServlet("/PlayerUpdateServlet")
+public class PlayerUpdateServlet extends HttpServlet {
+private static final long serialVersionUID = 1L;
+       
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public PlayerUpdateServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+/**
+* @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
+*/
+protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+
+ Player player=(Player)request.getSession().getAttribute("player");
+
+  String name= player.getName();
+ 
+System.out.println(name);
+  
+String role= request.getParameter("role");
+String style= request.getParameter("style");
+String team= request.getParameter("team");
+
+Player updateplayer =new Player(name,role,style,team);
+
+System.out.println(updateplayer);
+
+PlayerDao dao=new PlayerDao();
+response.getWriter().print(dao.updatePlayer(updateplayer));
+
+}
+
+
+}
+
+--------------------------------------------------------
+PlayerJsp.jsp
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<style>
+body {text-align : center;
+      border:2px outset white;
+      background:#a7ba7f;
+      border-style:dashed;
+      width:50%;
+      height: 300px;
+      box-sizing: border-box;
+      margin-top:150px;
+      margin-left: 300px;
+      margin-right: 150px;
+      padding-top: 40px;
+      padding-right:100px;
+      padding-left:100px;
+       }
+</style>
+</head>
+<body >
+
+<a href="PlayerJsp.jsp"> Save</a>
+<a href="SearchPlayer.jsp"> Search/Update</a>
+<a href="DeletePlayer.jsp"> Delete</a>
+
+
+<form action="PlayerServlet">
+
+
+
+<br>
+<label for="name">Player Name</label>
+<br>
+<input type="text" name="name">
+<br>
+<label for="role">Player Role</label>
+<br>
+<input type="text" name="role">
+<br>
+<label for="Style">Player Style</label>
+<br>
+<input type="text" name="style">
+<br>
+<label for="team">Player Team</label>
+<br>
+<input type="text" name="team">
+<br>
+
+
+ <input type="submit" value="save">
+</form>
+
+
+</body>
+</html>
+
+---------------------------------------------------
+
+DisplayPlayer.jsp
+
+       <%@page import="com.mydemo.model.Player"%>
+         <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  
+}
+th, td {
+  padding: 15px;
+  text-align:center;
+}
+table.center {
+  margin-left: auto; 
+  margin-right: auto;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+body{
+  text-align:center;
+}
+
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body  style="background-color:#a7ba7f;">
+
+<a href="PlayerJsp.jsp"> Save</a>
+<a href="SearchPlayer.jsp"> Search/Update</a>
+<a href="DeletePlayer.jsp"> Delete</a>
+
+
+<form action="PlayerUpdateServlet">
+
+<h1>
+Player Details
+</h1>
+
+
+<table border='2px'  class="center">
+
+<%!Player player; %>
+<%player=(Player)session.getAttribute("player"); %>
+<tr> <td>Player Name :</td> <td> <% out.print(player.getName()); %> </td> </tr> 
+<tr> <td>Player Role :</td> <td> <% out.print("<input type='text' name='role' value='" + player.getRole()+"'>"); %> </td> </tr>
+<tr> <td>Player Style :</td> <td> <% out.print("<input type='text' name='style' value='"+ player.getStyle()+"'>"); %> </td> </tr>
+<tr> <td>Player Team :</td> <td> <% out.print("<input type='text' name='team' value='"+ player.getTeam()+"'>"); %> </td> </tr>
+
+
+
+<%--  <tr> <td>Player Role :</td> <td> <% out.print(player.getRole()); %> </td> </tr>
+<tr> <td>Player Style:</td> <td> <% out.print(player.getStyle()); %></td> </tr>
+<tr> <td>Player Team:</td> <td> <% out.print(player.getTeam()); %></td> </tr>
+  --%>
+
+</table>
+<br>
+<input type="submit">
+</form>
+
+
+</body>
+</html>
+---------------------------------------------------------
+SearchPlayer.jsp
+
+<%@page import="com.mydemo.model.Player"%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="com.mydemo.dao.PlayerDao"%>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  
+}
+th, td {
+  padding: 15px;
+  text-align:center;
+}
+table.center {
+  margin-left: auto; 
+  margin-right: auto;
+}
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+th{
+background-color: #7f913c;
+  color: white;}
+body{
+  text-align:center;
+}
+</style>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+ <body  style="background-color:#a7ba7f;">
+<a href="PlayerJsp.jsp"> Save</a>
+<a href="SearchPlayer.jsp"> Search/Update</a>
+<a href="DeletePlayer.jsp"> Delete</a>
+
+
+
+
+<form action="PlayerSearchServlet">
+
+<br>
+<label for="name">Player Name</label>
+<br>
+<input type="text" name="name">
+<br>
+<br>
+<input type="submit" value="search">
+<br>
+</form>
+<br>
+<table class="center">
+
+<tr>
+
+<th> Player Name</th>
+<th> Player Role </th>
+<th> Player Style </th>
+<th> Player Team</th>
+
+</tr>
+
+
+<%
+
+PlayerDao dao=new PlayerDao();
+ArrayList<Player> players= dao.getPlayers();
+
+
+for(Player player:players)
+{
+out.print("<tr>");
+
+out.print("<td> "+ player.getName()+" </td>");
+out.print("<td> "+ player.getRole()+" </td>");
+out.print("<td> "+ player.getStyle()+" </td>");
+out.print("<td> "+ player.getTeam()+" </td>");
+
+out.print("</tr>");
+
+}
+
+%>
+
+</table>
+
+</body>
+</html>
+
+------------------------------------------------------
+DeletePlayer.jsp
+
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<style>
+body {text-align : center;
+      border:2px black;
+      border-style: outset;
+      width:30%;
+      height: 300px;
+      box-sizing: border-box;
+      margin-top:150px;
+      margin-left: 450px;
+      margin-right: 150px;
+      padding-top: 40px;
+      padding-right:100px;
+      padding-left:100px;
+}
+  }
+       
+</style>
+</head>
+
+<body style="background-color:#a7ba7f;">
+
+<a href="PlayerJsp.jsp"> Save</a>
+<a href="SearchPlayer.jsp"> Search/Update</a>
+<a href="DeletePlayer.jsp"> Delete</a>
+
+
+
+
+<form action="PlayerDeleteServlet">
+
+<br>
+<label for="name">Player Name</label>
+<br>
+<input type="text" name="name">
+<br>
+<br>
+<input type="submit" value="Delete">
+<br>
+</form>
+
+</body>
+</html>
+
+--------------------------------------------------------------
